@@ -60,7 +60,7 @@ ASOS is built as a layered system on top of Linux:
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-org/atlas-sanctum-os.git
+git clone https://github.com/atlasanctum/sturdy-octo-adventure.git
 cd atlas-sanctum-os
 ```
 
