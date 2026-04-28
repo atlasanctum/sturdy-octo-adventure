@@ -730,8 +730,8 @@ Special thanks to:
 
 **Built with ❤️ for a more transparent, accountable, and ethical future.**
 
-<img src="<img width="1536" height="1024" alt="ChatGPT Image Apr 28, 2026, 11_51_48 AM" src="https://github.com/user-attachments/assets/6236c19d-fd4a-40b0-aaee-d186d8cf1449" />
-" alt="Description" width="400">
+<img width="1536" height="1024" alt="ChatGPT Image Apr 28, 2026, 11_51_48 AM" src="https://github.com/user-attachments/assets/6236c19d-fd4a-40b0-aaee-d186d8cf1449" />
+
 
 
 Last Updated: April 2026  
