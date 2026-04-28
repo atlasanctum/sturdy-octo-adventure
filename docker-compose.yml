@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.postgres
+    container_name: asos-postgres
+    environment:
+      POSTGRES_USER: atlas
+      POSTGRES_PASSWORD: atlas_password
+      POSTGRES_DB: atlas_sanctum
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atlas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - asos-network
+
+  # NATS Message Broker
+  nats:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.nats
+    container_name: asos-nats
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8222/varz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - asos-network
+
+  # Hardhat Blockchain Node
+  blockchain:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.blockchain
+    container_name: asos-blockchain
+    ports:
+      - "8545:8545"
+    environment:
+      HARDHAT_NETWORK: hardhat
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - asos-network
+
+  # FastAPI Gateway
+  gateway:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.gateway
+    container_name: asos-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://atlas:atlas_password@postgres:5432/atlas_sanctum
+      NATS_URL: nats://nats:4222
+      BLOCKCHAIN_RPC_URL: http://blockchain:8545
+      BLOCKCHAIN_PRIVATE_KEY: ${BLOCKCHAIN_PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb476caded87fc5ac042bf97e9e27}
+      AUDIT_LOG_CONTRACT: ${AUDIT_LOG_CONTRACT:-0x0000000000000000000000000000000000000000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      blockchain:
+        condition: service_healthy
+    networks:
+      - asos-network
+
+  # CLI (for testing)
+  cli:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.cli
+    container_name: asos-cli
+    environment:
+      API_URL: http://gateway:8000
+    depends_on:
+      - gateway
+    networks:
+      - asos-network
+    # Override entrypoint for interactive use
+    entrypoint: /bin/bash
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  asos-network:
+    driver: bridge

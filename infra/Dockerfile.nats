@@ -1,0 +1,5 @@
+FROM nats:latest
+
+EXPOSE 4222 8222
+
+CMD ["nats-server", "--addr=0.0.0.0"]

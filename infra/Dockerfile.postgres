@@ -1,0 +1,9 @@
+FROM postgres:15-alpine
+
+ENV POSTGRES_USER=atlas
+ENV POSTGRES_PASSWORD=atlas_password
+ENV POSTGRES_DB=atlas_sanctum
+
+COPY data/init.sql /docker-entrypoint-initdb.d/
+
+EXPOSE 5432
